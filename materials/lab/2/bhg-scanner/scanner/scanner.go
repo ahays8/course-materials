@@ -19,7 +19,7 @@ var openports []int  // notice the capitalization here. access limited!
 func worker(ports, results chan int) {
 	for p := range ports {
 		address := fmt.Sprintf("scanme.nmap.org:%d", p)    
-		conn, err := net.Dial("tcp", address) // TODO 2 : REPLACE THIS WITH DialTimeout (before testing!)
+		conn, err := net.DialTimeout("tcp", address) // TODO 2 : REPLACE THIS WITH DialTimeout (before testing!)
 		if err != nil { 
 			results <- 0
 			continue
