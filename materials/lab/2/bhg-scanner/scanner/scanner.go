@@ -10,16 +10,17 @@ import (
 	"fmt"
 	"net"
 	"sort"
+	"time"
 )
 
-//TODO 3 : ADD closed ports; currently code only tracks open ports
+//TODONE 3 : ADD closed ports; currently code only tracks open ports
 var openports []int  // notice the capitalization here. access limited!
-
+var closedports []int
 
 func worker(ports, results chan int) {
 	for p := range ports {
 		address := fmt.Sprintf("scanme.nmap.org:%d", p)    
-		conn, err := net.DialTimeout("tcp", address) // TODO 2 : REPLACE THIS WITH DialTimeout (before testing!)
+		conn, err := net.DialTimeout("tcp", address,500*time.Millisecond) // TODONE 2 : REPLACE THIS WITH DialTimeout (before testing!)
 		if err != nil { 
 			results <- 0
 			continue
@@ -53,18 +54,25 @@ func PortScanner() int {
 		port := <-results
 		if port != 0 {
 			openports = append(openports, port)
+		}else{
+			closedports = append(closedports, port)
 		}
 	}
 
 	close(ports)
 	close(results)
 	sort.Ints(openports)
+	sort.Ints(closedports)
 
 	//TODO 5 : Enhance the output for easier consumption, include closed ports
 
 	for _, port := range openports {
 		fmt.Printf("%d open\n", port)
 	}
+
+	// for _, port := range closedports {
+	// 	fmt.Printf("%d closed\n", port)
+	// }
 
 	return len(openports) // TODO 6 : Return total number of ports scanned (number open, number closed); 
 	//you'll have to modify the function parameter list in the defintion and the values in the scanner_test
