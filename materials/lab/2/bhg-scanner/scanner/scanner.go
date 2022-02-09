@@ -20,7 +20,7 @@ var closedports []int
 func worker(ports, results chan int) {
 	for p := range ports {
 		address := fmt.Sprintf("scanme.nmap.org:%d", p)    
-		conn, err := net.DialTimeout("tcp", address,500*time.Millisecond) // TODONE 2 : REPLACE THIS WITH DialTimeout (before testing!)
+		conn, err := net.DialTimeout("tcp", address,750*time.Millisecond) // TODONE 2 : REPLACE THIS WITH DialTimeout (before testing!)
 		if err != nil { 
 			results <- 0
 			continue
@@ -37,7 +37,7 @@ func worker(ports, results chan int) {
 // No matter what you do, modify scanner_test.go to align; note the single test currently fails
 func PortScanner() int {  
 
-	ports := make(chan int, 100)   // TODO 4: TUNE THIS FOR CODEANYWHERE / LOCAL MACHINE
+	ports := make(chan int, 443)   // TODO 4: TUNE THIS FOR CODEANYWHERE / LOCAL MACHINE
 	results := make(chan int)
 
 	for i := 0; i < cap(ports); i++ {
