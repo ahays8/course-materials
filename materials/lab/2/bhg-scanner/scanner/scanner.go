@@ -37,7 +37,7 @@ func worker(ports, results chan int) {
 // No matter what you do, modify scanner_test.go to align; note the single test currently fails
 func PortScanner() int {  
 
-	ports := make(chan int, 443)   // TODO 4: TUNE THIS FOR CODEANYWHERE / LOCAL MACHINE
+	ports := make(chan int, 443)   // TODONE 4: TUNE THIS FOR CODEANYWHERE / LOCAL MACHINE
 	results := make(chan int)
 
 	for i := 0; i < cap(ports); i++ {
