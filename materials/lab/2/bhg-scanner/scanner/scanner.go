@@ -2,7 +2,9 @@
 // Code : https://github.com/blackhat-go/bhg/blob/c27347f6f9019c8911547d6fc912aa1171e6c362/ch-2/tcp-scanner-final/main.go
 // License: {$RepoRoot}/materials/BHG-LICENSE
 // Useage:
-// {TODO 1: FILL IN}
+// From course-materials/materials/lab/2/bhg-scanner/main
+// go build; ./main
+
 
 package scanner
 
@@ -13,16 +15,14 @@ import (
 	"time"
 )
 
-//TODONE 3 : ADD closed ports; currently code only tracks open ports
-var openports []int  // notice the capitalization here. access limited!
-var closedports []int
+
 
 func worker(ports, results chan int) {
 	for p := range ports {
 		address := fmt.Sprintf("scanme.nmap.org:%d", p)    
-		conn, err := net.DialTimeout("tcp", address,750*time.Millisecond) // TODONE 2 : REPLACE THIS WITH DialTimeout (before testing!)
+		conn, err := net.DialTimeout("tcp", address,750*time.Millisecond)
 		if err != nil { 
-			results <- 0
+			results <- -1*p
 			continue
 		}
 		conn.Close()
@@ -30,32 +30,31 @@ func worker(ports, results chan int) {
 	}
 }
 
-// for Part 5 - consider
-// easy: taking in a variable for the ports to scan (int? slice? ); a target address (string?)?
-// med: easy + return  complex data structure(s?) (maps or slices) containing the ports.
-// hard: restructuring code - consider modification to class/object 
-// No matter what you do, modify scanner_test.go to align; note the single test currently fails
-func PortScanner() int {  
 
-	ports := make(chan int, 443)   // TODONE 4: TUNE THIS FOR CODEANYWHERE / LOCAL MACHINE
+func PortScanner(lo int, hi int, verbose bool) (int, int, map[int]bool){  
+	var openports []int
+	var closedports []int
+	portlist := make(map[int]bool)
+	ports := make(chan int, 100)
 	results := make(chan int)
 
-	for i := 0; i < cap(ports); i++ {
+	for i := lo; i <= hi; i++ {
 		go worker(ports, results)
 	}
 
 	go func() {
-		for i := 1; i <= 1024; i++ {
+		for i := lo+1; i <= hi; i++ {
 			ports <- i
 		}
 	}()
-
-	for i := 0; i < 1024; i++ {
+	for i := lo; i < hi; i++ {
 		port := <-results
-		if port != 0 {
+		if port > 0 {
 			openports = append(openports, port)
-		}else{
-			closedports = append(closedports, port)
+			portlist[port]=true
+		}else if port < 0{
+			closedports = append(closedports, -1*port)
+			portlist[port]=false
 		}
 	}
 
@@ -63,17 +62,15 @@ func PortScanner() int {
 	close(results)
 	sort.Ints(openports)
 	sort.Ints(closedports)
-
-	//TODO 5 : Enhance the output for easier consumption, include closed ports
-
-	for _, port := range openports {
-		fmt.Printf("%d open\n", port)
+	if verbose{
+		for _, port := range openports {
+			fmt.Printf("%d open\n", port)
+		}
+	
+		for _, port := range closedports {
+			fmt.Printf("%d closed\n", port)
+		}
 	}
 
-	// for _, port := range closedports {
-	// 	fmt.Printf("%d closed\n", port)
-	// }
-
-	return len(openports) // TODO 6 : Return total number of ports scanned (number open, number closed); 
-	//you'll have to modify the function parameter list in the defintion and the values in the scanner_test
+	return len(openports), len(closedports), portlist
 }

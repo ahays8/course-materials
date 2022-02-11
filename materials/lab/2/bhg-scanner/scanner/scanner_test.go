@@ -4,27 +4,56 @@ import (
 	"testing"
 )
 
-// THESE TESTS ARE LIKELY TO FAIL IF YOU DO NOT CHANGE HOW the worker connects (e.g., you should use DialTimeout)
-func TestOpenPort(t *testing.T){
-
-    got := PortScanner() // Currently function returns only number of open ports
-    want := 2 // default value when passing in 1024 TO scanme; also only works because currently PortScanner only returns 
-	          //consider what would happen if you parameterize the portscanner address and ports to scan
-
-    if got != want {
-        t.Errorf("got %d, wanted %d", got, want)
+func TestOpenPort15to30(t *testing.T){
+	
+    gotopen,_,_ := PortScanner(15,30,true)
+    want := 1
+    if gotopen != want {
+        t.Errorf("got %d, wanted %d", gotopen, want)
     }
 }
 
-func TestTotalPortsScanned(t *testing.T){
-	// THIS TEST WILL FAIL - YOU MUST MODIFY THE OUTPUT OF PortScanner()
+func TestTotalPortsScanned15to30(t *testing.T){
+	
+    gotopen,gotclosed,_ := PortScanner(15,30,false)
+    want := 15
 
-    got := PortScanner() // Currently function returns only number of open ports
-    want := 1024 // default value; consider what would happen if you parameterize the portscanner ports to scan
-
-    if got != want {
-        t.Errorf("got %d, wanted %d", got, want)
+    if gotopen+gotclosed != want {
+        t.Errorf("got %d, wanted %d", gotopen+gotclosed, want)
     }
 }
+func TestPortOpen15to30(t *testing.T){
+	
+    _,_,ports := PortScanner(15,30,false)
+    want := true
 
+    if ports[22] != want {
+        t.Errorf("got %t, wanted %t", ports[22], want)
+    }
+}
+func TestPortClosed15to30(t *testing.T){
+	
+    _,_,ports := PortScanner(15,30,false)
+    want := false
 
+    if ports[5] != want {
+        t.Errorf("got %t, wanted %t", ports[5], want)
+    }
+}
+func TestOpenPort0to1024(t *testing.T){
+	
+    gotopen,_,_ := PortScanner(0,1024,false)
+    want := 1
+    if gotopen != want {
+        t.Errorf("got %d, wanted %d", gotopen, want)
+    }
+}
+func TestTotalPortsScanned0to1024(t *testing.T){
+	
+    gotopen,gotclosed,_ := PortScanner(0,1024,false)
+    want := 1024
+
+    if gotopen+gotclosed != want {
+        t.Errorf("got %d, wanted %d", gotopen+gotclosed, want)
+    }
+}

@@ -1,1 +1,35 @@
-You might need to do a "go mod init bhg-scanner" or "go mod tidy"
+BHG Lab 2
+Ally Hays
+
+Description:
+PortScanner(lo int, hi int, verbose bool) (numberOpen int, numberClosed int, portsList map[int]bool)
+This code scans a range of ports between lo and hi.
+It prints the statuses of these ports to the console if verbose is set to true, otherwise it prints nothing.
+It returns the number of open ports, the number of closed ports, and a map of ports.
+This map stores the number of each port, as well as its status in the form of a boolean.
+True means that the port is open, false means that the port is closed.
+
+Modifications:
+* added usage line
+* tracks closed ports
+* changed Dial to DialTimeout
+* added commas to console output
+* returns numberClosed
+* returns portsList
+* searches user specified range
+* option to turn off printing list of ports to console
+* modified and/or added the following tests
+
+Tests:
+TestOpenPort15to30: tests number of open ports 15 to 30, should return 1
+
+TestTotalPortsScanned15to30: tests number of ports 15 to 30, should return 15
+
+TestPortOpen15to30: tests status of port 22, should return true
+
+TestPortClosed15to30: tests status of port 5, should return false
+
+TestOpenPort0to1024: tests number of open ports 0 to 1024, should return 1
+(port 80 hasn't been open for me lately)
+
+TestTotalPortsScanned0to1024: tests number of ports 0 to 1024, should return 1024
