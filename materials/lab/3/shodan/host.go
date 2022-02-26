@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"	//to verify page number given as argument
 )
 
 type HostLocation struct {
@@ -41,9 +42,13 @@ type HostSearch struct {
 	Matches []Host `json:"matches"`
 }
 
-func (s *Client) HostSearch(q string) (*HostSearch, error) {
+func (s *Client) HostSearch(q string, page string) (*HostSearch, error) {
+	pageNumber, err :=  strconv.Atoi(page);
+	if err != nil {
+		return nil, err
+	}
 	res, err := http.Get(
-		fmt.Sprintf("%s/shodan/host/search?key=%s&query=%s", BaseURL, s.apiKey, q),
+		fmt.Sprintf("%s/shodan/host/search?key=%s&query=%s&page=%d", BaseURL, s.apiKey, q, pageNumber),
 	)
 	if err != nil {
 		return nil, err

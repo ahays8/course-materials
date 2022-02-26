@@ -14,8 +14,8 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		log.Fatalln("Usage: main <searchterm>")
+	if len(os.Args) != 3 {
+		log.Fatalln("Usage: main <searchterm> <pagenumber>")
 	}
 	apiKey := os.Getenv("SHODAN_API_KEY")
 	s := shodan.New(apiKey)
@@ -28,7 +28,7 @@ func main() {
 		info.QueryCredits,
 		info.ScanCredits)
 
-	hostSearch, err := s.HostSearch(os.Args[1])
+	hostSearch, err := s.HostSearch(os.Args[1],os.Args[2])
 	if err != nil {
 		log.Panicln(err)
 	}
