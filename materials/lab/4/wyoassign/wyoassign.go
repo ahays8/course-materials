@@ -102,26 +102,45 @@ func DeleteAssignment(w http.ResponseWriter, r *http.Request) {
 func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Entering %s end point", r.URL.Path)
 	w.Header().Set("Content-Type", "application/json")
-	
-	var response Response
-	response.Assignments = Assignments
+	w.WriteHeader(http.StatusOK)
+	params := mux.Vars(r)
 
+	r.ParseForm()
 
+	response := make(map[string]string)
 
+	response["status"] = "No Such ID to Update"
+	for index, assignment := range Assignments {
+			if assignment.Id == params["id"]{
+				assignment.Id =  r.FormValue("id")
+				assignment.Title =  r.FormValue("title")
+				assignment.Description =  r.FormValue("desc")
+				assignment.Points, _ =  strconv.Atoi(r.FormValue("points"))
+				Assignments[index]=assignment
+				response["status"] = "Success"
+				break
+			}
+	}
+		
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		return
+	}
+	w.Write(jsonResponse)
 }
 
 func CreateAssignment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var assignmnet Assignment
+	var assignment Assignment
 	r.ParseForm()
 	// Possible TODO: Better Error Checking!
 	// Possible TODO: Better Logging
 	if(r.FormValue("id") != ""){
-		assignmnet.Id =  r.FormValue("id")
-		assignmnet.Title =  r.FormValue("title")
-		assignmnet.Description =  r.FormValue("desc")
-		assignmnet.Points, _ =  strconv.Atoi(r.FormValue("points"))
-		Assignments = append(Assignments, assignmnet)
+		assignment.Id =  r.FormValue("id")
+		assignment.Title =  r.FormValue("title")
+		assignment.Description =  r.FormValue("desc")
+		assignment.Points, _ =  strconv.Atoi(r.FormValue("points"))
+		Assignments = append(Assignments, assignment)
 		w.WriteHeader(http.StatusCreated)
 	}
 	w.WriteHeader(http.StatusNotFound)
