@@ -55,7 +55,6 @@ func GetAssignments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO 
 	w.Write(jsonResponse)
 }
 
@@ -64,15 +63,24 @@ func GetAssignment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
-
+	var found = false
+	
 	for _, assignment := range Assignments {
 		if assignment.Id == params["id"]{
 			json.NewEncoder(w).Encode(assignment)
+			found = true;
 			break
 		}
 	}
-	//TODO : Provide a response if there is no such assignment
-	//w.Write(jsonResponse)
+	if !found{
+		response := make(map[string]string)
+		response["status"] = "No Such ID to Retrieve"
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			return
+		}
+		w.Write(jsonResponse)
+	}
 }
 
 func DeleteAssignment(w http.ResponseWriter, r *http.Request) {
@@ -106,22 +114,40 @@ func UpdateAssignment(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	r.ParseForm()
-
+	var duplicate = false;
 	response := make(map[string]string)
-
 	response["status"] = "No Such ID to Update"
-	for index, assignment := range Assignments {
+	
+	if params["id"]!=r.FormValue("id"){
+		for _, assignment := range Assignments {
+			if assignment.Id == r.FormValue("id"){
+				duplicate = true;
+				response["status"] = "New ID Already In Use: Assignment Not Updated"
+				break
+			}
+		}
+	}
+	if !duplicate{
+		for index, assignment := range Assignments {
 			if assignment.Id == params["id"]{
-				assignment.Id =  r.FormValue("id")
-				assignment.Title =  r.FormValue("title")
-				assignment.Description =  r.FormValue("desc")
-				assignment.Points, _ =  strconv.Atoi(r.FormValue("points"))
+				if(r.FormValue("id")!=""){
+					assignment.Id =  r.FormValue("id")
+				}
+				if(r.FormValue("title")!=""){
+					assignment.Title =  r.FormValue("title")
+				}
+				if(r.FormValue("desc")!=""){
+					assignment.Description =  r.FormValue("desc")
+				}
+				if(r.FormValue("points")!=""){
+					assignment.Points, _ =  strconv.Atoi(r.FormValue("points"))
+				}
 				Assignments[index]=assignment
 				response["status"] = "Success"
 				break
 			}
+		}
 	}
-		
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		return
@@ -133,16 +159,44 @@ func CreateAssignment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var assignment Assignment
 	r.ParseForm()
-	// Possible TODO: Better Error Checking!
-	// Possible TODO: Better Logging
-	if(r.FormValue("id") != ""){
+	var duplicate = false;
+	response := make(map[string]string)
+	response["status"] = "Assignment Creation Failed"
+
+	for _, assignment := range Assignments {
+		if assignment.Id == r.FormValue("id"){
+			duplicate = true;
+			response["status"] = "ID Already In Use: Assignment Not Created"
+			break
+		}
+	}
+	
+	if(r.FormValue("id") != "")&&(!duplicate){
 		assignment.Id =  r.FormValue("id")
-		assignment.Title =  r.FormValue("title")
-		assignment.Description =  r.FormValue("desc")
-		assignment.Points, _ =  strconv.Atoi(r.FormValue("points"))
+		if(r.FormValue("title")!=""){
+			assignment.Title =  r.FormValue("title")
+		}else{
+			assignment.Title = "Title"
+		}
+		if(r.FormValue("desc")!=""){
+			assignment.Description =  r.FormValue("desc")
+		}else{
+			assignment.Description = "Description"
+		}
+		if(r.FormValue("points")!=""){
+			assignment.Points, _ =  strconv.Atoi(r.FormValue("points"))
+		}else{
+			assignment.Points =  0
+		}
 		Assignments = append(Assignments, assignment)
+		response["status"] = "Success"
 		w.WriteHeader(http.StatusCreated)
 	}
 	w.WriteHeader(http.StatusNotFound)
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		return
+	}
+	w.Write(jsonResponse)
 
 }
