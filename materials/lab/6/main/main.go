@@ -8,18 +8,23 @@ import (
 	"github.com/gorilla/mux"
 	"scrape/scrape"
 )
+var Log_Level = 2;
+//There is another Log_Level variable in scrapeapi.go
 
-//TODO_1: Logging right now just happens, create a global constant integer LOG_LEVEL 
-//TODO_1: When LOG_LEVEL = 0 DO NOT LOG anything
-//TODO_1: When LOG_LEVEL = 1 LOG API details only 
-//TODO_1: When LOG_LEVEL = 2 LOG API details and file matches (e.g., everything)
+//TODONE_1: Logging right now just happens, create a global constant integer LOG_LEVEL 
+//TODONE_1: When LOG_LEVEL = 0 DO NOT LOG anything
+//TODONE_1: When LOG_LEVEL = 1 LOG API details only 
+//TODONE_1: When LOG_LEVEL = 2 LOG API details and file matches (e.g., everything)
 
 func main() {
-	
-	log.Println("starting API server")
+	if(Log_Level != 0){
+		log.Println("starting API server")
+	}
 	//create a new router
 	router := mux.NewRouter()
-	log.Println("creating routes")
+	if(Log_Level != 0){
+		log.Println("creating routes")
+	}
 	//specify endpoints
 	router.HandleFunc("/", scrape.MainPage).Methods("GET")
 
@@ -27,11 +32,13 @@ func main() {
 
 	router.HandleFunc("/indexer", scrape.IndexFiles).Methods("GET")
 	router.HandleFunc("/search", scrape.FindFile).Methods("GET")		
-    //TODO_2 router.HandleFunc("/addsearch/{regex}", scrape.TODOREPLACE).Methods("GET")
-    //TODO_3 router.HandleFunc("/clear", scrape.TODOREPLACE).Methods("GET")
-    //TODO_4 router.HandleFunc("/reset", scrape.TODOREPLACE).Methods("GET")
-
-
+	
+    router.HandleFunc("/addsearch/{regex}", scrape.AddRegEx).Methods("GET")
+	
+    router.HandleFunc("/clear", scrape.ClearRegEx).Methods("GET")
+	
+    router.HandleFunc("/reset", scrape.ResetRegEx).Methods("GET")
+	
 
 	http.Handle("/", router)
 
